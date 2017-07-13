@@ -1,13 +1,7 @@
 """
-CLiMF Collaborative Less-is-More Filtering, a variant of latent factor CF
-which optimises a lower bound of the smoothed reciprocal rank of "relevant"
-items in ranked recommendation lists.  The intention is to promote diversity
-as well as accuracy in the recommendations.  The method assumes binary
-relevance data, as for example in friendship or follow relationships.
-
-CLiMF: Learning to Maximize Reciprocal Rank with Collaborative Less-is-More Filtering
-Yue Shi, Martha Larson, Alexandros Karatzoglou, Nuria Oliver, Linas Baltrunas, Alan Hanjalic
-ACM RecSys 2012
+xCLiMF: Optimizing Expected Reciprocal Rank for Data with Multiple Levels of Relevance
+Yue Shia, Alexandros Karatzogloub, Linas Baltrunasb, Martha Larsona, Alan Hanjalica
+ACM RecSys 2013
 """
 
 from math import exp, log
@@ -34,7 +28,15 @@ def precompute_f(data,U,V,i):
     items = data[i].indices
     f = dict((j,np.dot(U[i],V[j])) for j in items)
     return f
-
+    
+def relevance_probability(r, maxi):
+  """compute relevance probability as described xClimf paper
+  params:
+    r:   rating
+    ma:  max rating
+  """
+  return (pow(2,r)-1)/pow(2,maxi)
+    
 def objective(data,U,V,lbda):
     """compute objective function F(U,V)
     params:
@@ -45,36 +47,71 @@ def objective(data,U,V,lbda):
     returns:
       current value of F(U,V)
     """
-    F = -0.5*lbda*(np.sum(U*U)+np.sum(V*V))
-    for i in xrange(len(U)):
-        f = precompute_f(data,U,V,i)
-        for j in f:
-            F += log(g(f[j]))
-            for k in f:
-                F += log(1-g(f[k]-f[j]))
-    return F
+    maxi = data.max()
+    obj = -0.5*lbda*(np.sum(U*U)+np.sum(V*V))
+    for m in xrange(len(U)):
+        f = precompute_f(data,U,V,m)
+        for i in f:
+            fmi = f[i]
+            rmi = relevance_probability(fmi, maxi)
+            brackets = log(g(fmi))
+            for j in f:
+                if j != i:
+                    fmj = f[j]
+                    rmj = relevance_probability(fmj, maxi)
+                    brackets += log(1 - rmj * g(fmj - fmi))
+            obj += rmi * brackets 
+    return obj
 
-def update(data,U,V,lbda,gamma):
+def update(data,Uo,Vo,lbda,gamma):
     """update user/item factors using stochastic gradient ascent
     params:
       data : scipy csr sparse matrix containing user->(item,count)
-      U    : user factors
-      V    : item factors
+      Uo   : user factors
+      Vo   : item factors
       lbda : regularization constant lambda
       gamma: learning rate
     """
-    for i in xrange(len(U)):
-        dU = -lbda*U[i]
-        f = precompute_f(data,U,V,i)
-        for j in f:
-            dV = g(-f[j])-lbda*V[j]
+    U = Uo.copy()
+    V = Vo.copy()
+    
+    for m in xrange(len(U)):    
+        dU = np.zeros(len(U[m]))
+        lbdaum = lbda * U[m]
+        f = precompute_f(data,U,V,m)
+        
+        for i in f:
+        
+            ymi = data[m,i]
+            fmi = f[i]
+            g_fmi = g(-fmi)
+            
+            brackets_u = g_fmi * V[i]
+            brackets_i = g_fmi
+            
             for k in f:
-                dV += dg(f[j]-f[k])*(1/(1-g(f[k]-f[j]))-1/(1-g(f[j]-f[k])))*U[i]
-            V[j] += gamma*dV
-            dU += g(-f[j])*V[j]
-            for k in f:
-                dU += (V[j]-V[k])*dg(f[k]-f[j])/(1-g(f[k]-f[j]))
-        U[i] += gamma*dU
+                if i != k:
+                    ymk = data[m,k]
+                    fmk = f[k]
+                    fmk_fmi = fmk - fmi
+                    fmi_fmk = fmi - fmk
+                    
+                    top = ymk * dg(fmk_fmi)
+                    bot = 1 - ymk * g(fmk_fmi)
+                    sub = V[i] - V[k]
+                    brackets_u += top / bot * sub
+                    
+                    div1 = 1/(1 - (ymk * g(fmk_fmi)))
+                    div2 = 1/(1 - (ymi * g(fmi_fmk)))
+                    brackets_i += ymk * dg(fmi_fmk) * (div1 - div2)
+                
+            dI = ymi * brackets_i * U[m] - lbda * V[i]
+            Vo[i] += gamma * dI
+            
+            dU += ymi * brackets_u - lbdaum
+            
+        Uo[m] += gamma * dU
+      
 
 def compute_mrr(data,U,V,test_users=None):
     """compute average Mean Reciprocal Rank of data according to factors
@@ -96,7 +133,8 @@ def compute_mrr(data,U,V,test_users=None):
             if item in items:
                 mrr.append(1.0/(rank+1))
                 break
-    assert(len(mrr) == len(test_users))
+    #print(len(mrr), "==", len(test_users))    
+    #assert(len(mrr) == len(test_users))
     return np.mean(mrr)
 
 if __name__=='__main__':
