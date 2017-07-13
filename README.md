@@ -7,10 +7,6 @@ Both algorithms are a variante of Latent factor CF, wich optimises a lower
 bound of the smoothed reciprocal rank of "relevant" items in ranked 
 recommendation lists.
 
-## Implementation
-
-This xCLiMF implementation is based in ( https://github.com/gamboviol/climf ) 
-
 ## References
 
 CLiMF: Learning to Maximize Reciprocal Rank with Collaborative Less-is-More Filtering
