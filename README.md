@@ -27,8 +27,16 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 ## Status
 
-The implementation is not correct yet. The objective function is not maximizing 
-in the gradient ascent. Please be my guest to help.
+- Objective function is now maximizing (Discovered using GridSearch in 
+**xclimf_test.py** some gamma and lambda parameters that maximizes)
+
+- There is an workaround in the objective function when sometimes we got a 
+ValueError because log of a negative number. Don't know if this negative 
+number could be possible or it is a bug in the gradient ascent.
+
+- The cross-validation inherited from (gamboviol/climf) is wrong. The train and
+test data are not exclusively. The correct way would be sample some items from
+a sample users and validade MRR without replacement.
 
 You can see the problem easily running the **xclimf_test.py**
 
