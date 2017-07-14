@@ -56,20 +56,20 @@ def objective(data,U,V,lbda):
             rmi = relevance_probability(fmi, maxi)
             brackets = log(g(fmi))
             for j in f:
-                if j != i:
-                    fmj = f[j]
-                    rmj = relevance_probability(fmj, maxi)
-                    #===========================================================
-                    #the line bellow is not in the paper.
-                    # had to do that because sometimes "rmj * g(fmj - fmi)"
-                    # got 1 or more, an them in "log(1 - rmj * g(fmj - fmi))"
-                    # we got ValueError because log of negative
-                    #
-                    # why "rmj * g(fmj - fmi)" is sometimes goting 1 or more?
-                    # is that possible? or is that a bug?
-                    #===========================================================
-                    oneless = min(rmj * g(fmj - fmi), 0.9999999999999999)
-                    brackets += log(1 - oneless)
+                fmj = f[j]
+                rmj = relevance_probability(fmj, maxi)
+                try:
+                    brackets += log(1 - rmj * g(fmj - fmi))
+                except:
+                    print("u", U[m])
+                    print("v", V[j])
+                    print("f", f)
+                    print("fmj", fmj)
+                    print("fmi", fmi)
+                    print("g", g(fmj - fmi))
+                    print("rmj", rmj)
+                    print(rmj * g(fmj - fmi))
+                    exit()
             obj += rmi * brackets 
     return obj
 
