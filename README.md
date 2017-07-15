@@ -25,21 +25,6 @@ xCLiMF implementation that have been consulted:
 https://github.com/gpoesia/xclimf (with this bug: 
 https://github.com/gpoesia/xclimf/issues/1)
 
-## Status
-
-- Objective function is now maximizing (Discovered using GridSearch in 
-**xclimf_test.py** some gamma and lambda parameters that maximizes)
-
-- There is an workaround in the objective function when sometimes we got a 
-ValueError because log of a negative number. Don't know if this negative 
-number could be possible or it is a bug in the gradient ascent.
-
-- The cross-validation inherited from (gamboviol/climf) is wrong. The train and
-test data are not exclusively. The correct way would be sample some items from
-a sample users and validade MRR without replacement.
-
-You can see the problem easily running the **xclimf_test.py**
-
 ## Running with real data
 
 To run on the supplied Movie Lens dataset:
@@ -50,4 +35,13 @@ To run on the supplied Epinions dataset (binary):
 
     python xclimf.py --train data/EP25_UPL5_train.mtx --test data/EP25_UPL5_test.mtx
     
- 
+## TODO
+
+  - better grid search
+  - Use ml1m database with top items
+  - mudar a objetiva pra usar ymi pra calcular rmi
+  - mudar a derivada pra usar relevance
+  - Use ml100k database with random items
+  - Use ml1m database with random items
+  - Try initialize U and V staticly
+

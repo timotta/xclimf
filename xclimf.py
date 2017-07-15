@@ -53,23 +53,14 @@ def objective(data,U,V,lbda):
         f = precompute_f(data,U,V,m)
         for i in f:
             fmi = f[i]
-            rmi = relevance_probability(fmi, maxi)
+            ymi = data[m,i]
+            rmi = relevance_probability(ymi, maxi)
             brackets = log(g(fmi))
             for j in f:
                 fmj = f[j]
-                rmj = relevance_probability(fmj, maxi)
-                try:
-                    brackets += log(1 - rmj * g(fmj - fmi))
-                except:
-                    print("u", U[m])
-                    print("v", V[j])
-                    print("f", f)
-                    print("fmj", fmj)
-                    print("fmi", fmi)
-                    print("g", g(fmj - fmi))
-                    print("rmj", rmj)
-                    print(rmj * g(fmj - fmi))
-                    exit()
+                ymj = data[m,j]
+                rmj = relevance_probability(ymj, maxi)
+                brackets += log(1 - rmj * g(fmj - fmi))
             obj += rmi * brackets 
     return obj
 
@@ -143,8 +134,6 @@ def compute_mrr(data,U,V,test_users=None):
             if item in items:
                 mrr.append(1.0/(rank+1))
                 break
-    #print(len(mrr), "==", len(test_users))    
-    #assert(len(mrr) == len(test_users))
     return np.mean(mrr)
 
 if __name__=='__main__':
@@ -169,7 +158,7 @@ if __name__=='__main__':
     data = mmread(opts.train).tocsr()  # this converts a 1-indexed file to a 0-indexed sparse array
     if opts.test:
         testdata = mmread(opts.test).tocsr()
-
+  
     U = 0.01*np.random.random_sample((data.shape[0],opts.D))
     V = 0.01*np.random.random_sample((data.shape[1],opts.D))
 
