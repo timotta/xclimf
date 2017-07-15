@@ -39,9 +39,9 @@ To run on the supplied Epinions dataset (binary):
 
   - better grid search
   - Use ml1m database with top items
-  - mudar a objetiva pra usar ymi pra calcular rmi
   - mudar a derivada pra usar relevance
   - Use ml100k database with random items
   - Use ml1m database with random items
   - Try initialize U and V staticly
+  - Verify math range error at scala
 
