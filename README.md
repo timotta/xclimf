@@ -1,11 +1,10 @@
 xCLiMF
 ======
 
-This is a tentative to implement the Extended Collaborative Less-isMore 
-Filtering, a CLiMF evolution to allow using multiple levels of relevance data. 
-Both algorithms are a variante of Latent factor CF, wich optimises a lower 
-bound of the smoothed reciprocal rank of "relevant" items in ranked 
-recommendation lists.
+Python implementation of the Extended Collaborative Less-isMore Filtering, a 
+CLiMF evolution to allow using multiple levels of relevance data. Both 
+algorithms are a variante of Latent factor CF, wich optimises a lower bound of 
+the smoothed reciprocal rank of "relevant" items in ranked recommendation lists.
 
 ## References
 
@@ -34,6 +33,10 @@ To run on the supplied Movie Lens dataset:
 To run on the supplied Epinions dataset (binary):
 
     python xclimf.py --train data/EP25_UPL5_train.mtx --test data/EP25_UPL5_test.mtx
+    
+## Running tests
+
+    py.test -s
     
 ## TODO
 
