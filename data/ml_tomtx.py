@@ -4,16 +4,18 @@ from scipy.sparse import csr_matrix
 import numpy as np
 from scipy.io.mmio import mmwrite, mmread
 
-INPUT = 'ml-100k/u.data'
-OUTPUT_TRAIN = 'ml_upl5_train.mtx'
-OUTPUT_TEST = 'ml_upl5_test.mtx'
+INPUT = 'ml-1m/ratings.dat'
+OUTPUT_TRAIN = 'ml1m_upl5_train.mtx'
+OUTPUT_TEST = 'ml1m_upl5_test.mtx'
 UPL = 5
+DELIMITER = "::"
 
 items = defaultdict(float)
 users = defaultdict(list)
-with open(INPUT, 'rb') as csvfile:
-    c = csv.reader(csvfile, delimiter='\t')
-    for r in c:
+with open(INPUT, 'rb') as f:
+    lines = f.readlines()
+    for line in lines:
+        r = line.split(DELIMITER)
         m = int(r[0])-1
         j = int(r[1])-1
         v = float(r[2])
