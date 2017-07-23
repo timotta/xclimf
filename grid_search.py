@@ -12,18 +12,21 @@ import psutil
 from optparse import OptionParser
 from multiprocess import Pool, cpu_count
 
-def read_users_and_items(filename, sep):
+def read_users_and_items(filename, sep, skip):
     items = defaultdict(float)
     users = defaultdict(list)
     with open(filename, 'rb') as f:
         lines = f.readlines()
         for line in lines:
-            r = line.split(sep)
-            m = r[0]
-            j = int(r[1])-1
-            v = float(r[2])
-            users[m].append((j, v))
-            items[j] += v
+            if not skip:
+                r = line.split(sep)
+                m = r[0]
+                j = int(r[1])-1
+                v = float(r[2])
+                users[m].append((j, v))
+                items[j] += v
+            else:
+                skip = False
     return (users, items)
     
 def top_items(items):
@@ -173,13 +176,16 @@ if __name__=='__main__':
     parser.add_option('--topk',dest='topk',type=int,default=5,help='number of topk items used for each user  (default: %default)')
     parser.add_option('--kfolds',dest='kfolds',type=int,default=3,help='number of folds used for cross-validation  (default: %default)')
     parser.add_option('--cores',dest='cores',type=int,default=cpu_count()-1,help='number of cores to run in parallel (default: %default)')
+    parser.add_option('--skipfl',dest='skipfl',action="store_true",help='should skip dataset first line or not (default: %default)')
     
     (opts,args) = parser.parse_args()
     if not opts.dataset:
         parser.print_help()
         raise SystemExit
     
-    (users, items) = read_users_and_items(opts.dataset, opts.sep)
+    print("reading %s..." % opts.dataset)
+    
+    (users, items) = read_users_and_items(opts.dataset, opts.sep, opts.skipfl)
     
     print("loaded %d users" % len(users))
     print("loaded %d items" % len(items))
