@@ -24,15 +24,20 @@ xCLiMF implementation that have been consulted:
 https://github.com/gpoesia/xclimf (with this bug: 
 https://github.com/gpoesia/xclimf/issues/1)
 
+## Experiments
+
+1. Runned Grid Search for movie lens 20m dataset ( https://grouplens.org/datasets/movielens/20m/ ). Got as best cross validation MRR: 0.0398 using D=25, lambda=10, gamma=10. Now I'm running again to confirm the result.
+
+    python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+
+## Problems
+
+- Get many times **math range error**s
+- Get sometimes **Numerical result out of range**
+
 ## Running with real data
 
-To run on the supplied Movie Lens dataset:
-
-    python xclimf.py --train data/u1_train.mtx --test data/u1_test.mtx 
-
-To run on the supplied Epinions dataset (binary):
-
-    python xclimf.py --train data/EP25_UPL5_train.mtx --test data/EP25_UPL5_test.mtx
+Going to update this section after turn main xclimf.py better
     
 ## Running tests
 
@@ -40,11 +45,7 @@ To run on the supplied Epinions dataset (binary):
     
 ## TODO
 
-  - better grid search
-  - Use ml1m database with top items
-  - mudar a derivada pra usar relevance
-  - Use ml100k database with random items
-  - Use ml1m database with random items
-  - Try initialize U and V staticly
+  - mudar a derivada pra usar relevance?
+  - try do not exclude itens on train like described in paper
   - Verify math range error at scala
 
