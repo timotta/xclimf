@@ -113,9 +113,7 @@ def run(train, test, D, lbda, gamma, eps=0.1):
         elif objective < last_objective + eps:
             print "objective should be bigger or equal last objective..."
             break
-            
-        break
-    
+
     trainmrr = xclimf.compute_mrr(train, U, V)
     testmrr = xclimf.compute_mrr(test, U, V)
     print "train mrr", trainmrr
