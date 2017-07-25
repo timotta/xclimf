@@ -26,7 +26,11 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 ## Experiments
 
-1. Runned Grid Search for movie lens 20m dataset ( https://grouplens.org/datasets/movielens/20m/ ). Got as best cross validation MRR: 0.0398 using D=25, lambda=10, gamma=10. Now I'm running again to confirm the result.
+1. Runned Grid Search for movie lens 20m dataset ( https://grouplens.org/datasets/movielens/20m/ ). Got as best cross validation MRR: 0.0398 using D=25, lambda=10, gamma=10. 
+
+    python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+
+2. Runned again Grid Search for movie lens 20m dataset and got the same result for MRR: 0.0368 using D=25, lambda=10, gamma=10
 
     python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
 
