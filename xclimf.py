@@ -6,6 +6,8 @@ ACM RecSys 2013
 
 from math import exp, log
 import numpy as np
+import command
+import dataset
 
 def g(x):
     """sigmoid function"""
@@ -136,47 +138,67 @@ def compute_mrr(data,U,V,test_users=None):
                 break
     return np.mean(mrr)
 
-if __name__=='__main__':
+def gradient_ascent(train, test, D, lbda, gamma, max_iters=25, foreach=None, eps=0.1):
+    U = 0.01*np.random.random_sample((train.shape[0],D))
+    V = 0.01*np.random.random_sample((train.shape[1],D))
 
-    from optparse import OptionParser
-    from scipy.io.mmio import mmread
-    import random
+    last_objective = float("-inf")
 
-    parser = OptionParser()
-    parser.add_option('--train',dest='train',help='training dataset (matrixmarket format)')
-    parser.add_option('--test',dest='test',help='optional test dataset (matrixmarket format)')
-    parser.add_option('-d','--dim',dest='D',type='int',default=10,help='dimensionality of factors (default: %default)')
-    parser.add_option('-l','--lambda',dest='lbda',type='float',default=0.001,help='regularization constant lambda (default: %default)')
-    parser.add_option('-g','--gamma',dest='gamma',type='float',default=0.0001,help='gradient ascent learning rate gamma (default: %default)')
-    parser.add_option('--max_iters',dest='max_iters',type='int',default=25,help='max iterations (default: %default)')
+    for i in xrange(max_iters):
+        update(train, U, V, lbda, gamma)
+        obj = objective(train, U, V, lbda)
+        if foreach:
+          foreach(i, obj, U, V)
+        if obj > last_objective:
+            last_objective = obj
+        elif obj < last_objective + eps:
+            print "objective should be bigger or equal last objective..."
+            break
+
+    return (U, V)
+
+def main():
+    parser = command.options()
+    parser.add_option('--dim',dest='D',type='int',default=10,help='dimensionality of factors (default: %default)')
+    parser.add_option('--lambda',dest='lbda',type='float',default=0.001,help='regularization constant lambda (default: %default)')
+    parser.add_option('--gamma',dest='gamma',type='float',default=0.0001,help='gradient ascent learning rate gamma (default: %default)')
+    parser.add_option('--iters',dest='iters',type='int',default=25,help='max iterations (default: %default)')
 
     (opts,args) = parser.parse_args()
-    if not opts.train or not opts.D or not opts.lbda or not opts.gamma:
+    if not opts.dataset:
         parser.print_help()
         raise SystemExit
+    
+    print("reading %s..." % opts.dataset)
+    
+    (users, items) = dataset.read_users_and_items(opts.dataset, opts.sep, opts.skipfl)
 
-    data = mmread(opts.train).tocsr()  # this converts a 1-indexed file to a 0-indexed sparse array
-    if opts.test:
-        testdata = mmread(opts.test).tocsr()
-  
-    U = 0.01*np.random.random_sample((data.shape[0],opts.D))
-    V = 0.01*np.random.random_sample((data.shape[1],opts.D))
+    print("loaded %d users" % len(users))
+    print("loaded %d items" % len(items))
+    
+    topitems = dataset.top_items(items)
+    
+    print("do not use these top items %s" % str(topitems))
+    
+    (train, test) = dataset.split_train_test(users, topitems, opts.topk) 
+    
+    def print_mrr(i, objective, U, V):
+        print("interaction %d: %f" % (i,objective) )
+        trainmrr = compute_mrr(train, U, V)
+        testmrr = compute_mrr(test, U, V)
+        print "train mrr", trainmrr
+        print "test mrr", testmrr
+    
+    (U, V) = gradient_ascent(train, test, 
+      D=opts.D, 
+      lbda=opts.lbda, 
+      gamma=opts.gamma,
+      max_iters=opts.iters,
+      foreach=print_mrr)
+      
+    print("U", U)
+    print("V", V)
+    
 
-    num_train_sample_users = min(data.shape[0],1000)
-    train_sample_users = random.sample(xrange(data.shape[0]),num_train_sample_users)
-    print 'train mrr = {0:.4f}'.format(compute_mrr(data,U,V,train_sample_users))
-    if opts.test:
-        num_test_sample_users = min(testdata.shape[0],1000)
-        test_sample_users = random.sample(xrange(testdata.shape[0]),num_test_sample_users)
-        print 'test mrr  = {0:.4f}'.format(compute_mrr(testdata,U,V,test_sample_users))
-
-    for iter in xrange(opts.max_iters):
-        update(data,U,V,opts.lbda,opts.gamma)
-        print 'iteration {0}:'.format(iter+1)
-        print 'objective = {0:.4f}'.format(objective(data,U,V,opts.lbda))
-        print 'train mrr = {0:.4f}'.format(compute_mrr(data,U,V,train_sample_users))
-        if opts.test:
-            print 'test mrr  = {0:.4f}'.format(compute_mrr(testdata,U,V,test_sample_users))
-
-    print 'U',U
-    print 'V',V
+if __name__=='__main__':
+    main()

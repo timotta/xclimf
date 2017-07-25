@@ -5,6 +5,7 @@ import numpy as np
 import xclimf
 import dataset
 import itertools
+import command
 
 import os
 import signal
@@ -12,25 +13,15 @@ import psutil
 from optparse import OptionParser
 from multiprocess import Pool, cpu_count
 
+def print_interaction(i, objective, U, V):
+    print("interaction %d: %f" % (i,objective) )
+
 def run(train, test, D, lbda, gamma, eps=0.1):
     print "=" * 80
     print D, lbda, gamma
-
-    U = 0.01*np.random.random_sample((train.shape[0],D))
-    V = 0.01*np.random.random_sample((train.shape[1],D))
-
-    last_objective = float("-inf")
-
-    for i in xrange(25):
-        xclimf.update(train, U, V, lbda, gamma)
-        objective = xclimf.objective(train, U, V, lbda)
-        print("interaction %d: %f" % (i,objective) )
-        
-        if objective > last_objective:
-            last_objective = objective
-        elif objective < last_objective + eps:
-            print "objective should be bigger or equal last objective..."
-            break
+    
+    (U, V) = xclimf.gradient_ascent(train, test, D, lbda, gamma, 
+                      foreach=print_interaction)
 
     trainmrr = xclimf.compute_mrr(train, U, V)
     testmrr = xclimf.compute_mrr(test, U, V)
@@ -86,14 +77,9 @@ def grid_search(folds, cores):
     return results
 
 def main():
-    parser = OptionParser()
-    parser.add_option('--dataset',dest='dataset', help='training dataset')
-    parser.add_option('--sep',dest='sep',default="\t",help='string used to split colums in dataset  (default: %default)')
-    parser.add_option('--topk',dest='topk',type=int,default=5,help='number of topk items used for each user  (default: %default)')
-    parser.add_option('--kfolds',dest='kfolds',type=int,default=3,help='number of folds used for cross-validation  (default: %default)')
+    parser = command.options()
     parser.add_option('--cores',dest='cores',type=int,default=cpu_count()-1,help='number of cores to run in parallel (default: %default)')
-    parser.add_option('--skipfl',dest='skipfl',action="store_true",help='should skip dataset first line or not (default: %default)')
-    
+
     (opts,args) = parser.parse_args()
     if not opts.dataset:
         parser.print_help()
