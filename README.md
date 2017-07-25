@@ -28,11 +28,11 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 1. Runned Grid Search for movie lens 20m dataset ( https://grouplens.org/datasets/movielens/20m/ ). Got as best cross validation MRR: 0.0398 using D=25, lambda=10, gamma=10. 
 
-    python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+        python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
 
 2. Runned again Grid Search for movie lens 20m dataset and got the same result for MRR: 0.0368 using D=25, lambda=10, gamma=10
 
-    python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+        python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
 
 ## Problems
 
@@ -41,15 +41,16 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 ## Running with real data
 
-Going to update this section after turn main xclimf.py better
+To see all options:
+
+    python xclimf.py -h
+    
+So you run like this 
+   
+    python xclimf.py --dataset data/ml-100k/u.data
     
 ## Running tests
 
     py.test -s
-    
-## TODO
 
-  - mudar a derivada pra usar relevance?
-  - try do not exclude itens on train like described in paper
-  - Verify math range error at scala
 
