@@ -96,13 +96,14 @@ def main():
     
     print("do not use these top items %s" % str(topitems))
     
-    folds = dataset.split_folds(users, opts.kfolds)
+    folds = dataset.split_many_train_test(
+      opts.kfolds, users, topitems,
+      0.1, opts.topk
+    )
     
-    print("splited into %d folds of %d users" % (len(folds), len(folds[0])) )
-    
-    folds_matrixes = dataset.split_train_test_many_folds(folds, topitems, opts.topk)
-    
-    results = grid_search(folds_matrixes, opts.cores)
+    print("splited into %d folds" % (len(folds)) )
+
+    results = grid_search(folds, opts.cores)
     
     print("="*80)
     print_better(results)

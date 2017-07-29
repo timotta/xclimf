@@ -37,51 +37,48 @@ def split_folds(users, kfolds):
         folds.append(fold)
     return folds
     
-def to_matrix(rows, cols, values):
-    va = np.array(values)
-    ra = np.array(rows)
-    ca = np.array(cols)
+def to_matrix(data):
+    va = np.array(data["vals"])
+    ra = np.array(data["rows"])
+    ca = np.array(data["cols"])
     nr = ra.max() + 1
     nc = ca.max() + 1
     return csr_matrix((va, (ra, ca)), shape=(nr, nc))  
     
-def split_train_test(fold, topitems, topk):
-    rows_train = []
-    cols_train = []
-    values_train = []
-    rows_test = []
-    cols_test = []
-    values_test = []
+def put_matrix_data(user, top, data):
+    for t in top:
+        data["rows"].append(user)
+        data["cols"].append(int(t[0]))
+        data["vals"].append(t[1])
     
-    users = list(fold.iteritems())
+def split_train_test(data, topitems, perctest, topk):
+    dtrain = defaultdict(list)
+    dtest = defaultdict(list)
+    
+    users = list(data.iteritems())
     
     for userid in xrange(len(users)):
         user = users[userid][0]
         ratings = users[userid][1]
     
         filtered = filter(lambda a: a[0] not in topitems, ratings)
-        top = np.array(sorted(filtered, key=lambda a: a[1])[-topk*2:])
+        sortedit = sorted(filtered, key=lambda a: a[1])
+        top = np.array(sortedit[-topk*2:])
         np.random.shuffle(top)
-        
         tops = np.split(top, 2)
         
-        for i in tops[0]:
-            rows_train.append(userid)
-            cols_train.append(i[0])
-            values_train.append(i[1])
-        for i in tops[1]:
-            rows_test.append(userid)
-            cols_test.append(i[0])
-            values_test.append(i[1])
-            
-    train = to_matrix(rows_train, cols_train, values_train)
-    test = to_matrix(rows_test, cols_test, values_test)
+        put_matrix_data(userid, tops[0], dtrain)
+        if random.random() < perctest:
+            put_matrix_data(userid, tops[1], dtest)
     
+    train = to_matrix(dtrain)
+    test = to_matrix(dtest)
+
     return (train, test)
     
-def split_train_test_many_folds(folds, topitems, topk):
+def split_many_train_test(num, data, topitems, perctest, topk):
     matrixes = []
-    for fold in folds:
-        matrixes.append(split_train_test(fold, topitems, topk))
+    for i in xrange(num):
+        matrixes.append(split_train_test(data, topitems, perctest, topk))
     return matrixes
 

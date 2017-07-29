@@ -116,26 +116,23 @@ def update(data,Uo,Vo,lbda,gamma):
         Uo[m] += gamma * dU
       
 
-def compute_mrr(data,U,V,test_users=None):
+def compute_mrr(data,U,V):
     """compute average Mean Reciprocal Rank of data according to factors
     params:
       data      : scipy csr sparse matrix containing user->(item,count)
       U         : user factors
       V         : item factors
-      test_users: optional subset of users over which to compute MRR
-    returns:
       the mean MRR over all users in data
     """
     mrr = []
-    if test_users is None:
-        test_users = range(len(U))
-    for ix,i in enumerate(test_users):
-        items = set(data[i].indices)
-        predictions = np.sum(np.tile(U[i],(len(V),1))*V,axis=1)
-        for rank,item in enumerate(np.argsort(predictions)[::-1]):
-            if item in items:
-                mrr.append(1.0/(rank+1))
-                break
+    for m in xrange(data.shape[0]):
+        if(len(data[m].indices) > 0):
+            items = set(data[m].indices)
+            predictions = np.sum(np.tile(U[m],(len(V),1))*V,axis=1)
+            for rank,item in enumerate(np.argsort(predictions)[::-1]):
+                if item in items:
+                    mrr.append(1.0/(rank+1))
+                    break
     return np.mean(mrr)
 
 def gradient_ascent(train, test, D, lbda, gamma, max_iters=25, foreach=None, eps=0.1):
@@ -180,7 +177,7 @@ def main():
     
     print("do not use these top items %s" % str(topitems))
     
-    (train, test) = dataset.split_train_test(users, topitems, opts.topk) 
+    (train, test) = dataset.split_train_test(users, topitems, 0.1, opts.topk) 
     
     def print_mrr(i, objective, U, V):
         print("interaction %d: %f" % (i,objective) )
