@@ -64,7 +64,7 @@ def objective(data,U,V,lbda):
                 rmj = relevance_probability(ymj, maxi)
                 brackets += log(1 - rmj * g(fmj - fmi))
             obj += rmi * brackets 
-    return obj
+    return obj / len(U)
 
 def update(data,Uo,Vo,lbda,gamma):
     """update user/item factors using stochastic gradient ascent
