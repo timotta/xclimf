@@ -34,6 +34,10 @@ https://github.com/gpoesia/xclimf/issues/1)
 
         python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
 
+3. Runned Grid Search params results on entire dataset but got "math range error"
+
+        python -u xclimf.py --dataset ../ml-20m/ratings.csv --sep , --skipfl --dim 25 --lambda 10 --gamma 10
+
 ## Problems
 
 - Get many times **math range error**s
