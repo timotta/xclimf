@@ -37,6 +37,10 @@ https://github.com/gpoesia/xclimf/issues/1)
 3. Runned Grid Search params results on entire dataset but got "math range error"
 
         python -u xclimf.py --dataset ../ml-20m/ratings.csv --sep , --skipfl --dim 25 --lambda 10 --gamma 10
+        
+4. After changing the Grid Search to use whole dataset for train but select a sample of different users for test in each fold: Got as best cross validation MRR: 0.01 using D=25, lambda=10, gamma=10.
+
+        python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
 
 ## Problems
 

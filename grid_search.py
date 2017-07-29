@@ -29,15 +29,15 @@ def run(train, test, D, lbda, gamma, eps=0.1):
     print "test mrr", testmrr
     return testmrr
 
-def run_safe(train, test, D, lbda, gamma):
+def run_safe(train, test, params):
     try:
-        return run(train, test, D, lbda, gamma)    
+        return run(train, test, params["dims"], params["lambda"], params["gamma"])    
     except Exception, e:
         print(e)
         return 0.0
     
-def run_safe_many(folds, D, lbda, gamma):
-    return [run_safe(f[0], f[1], D, lbda, gamma) for f in folds]
+def run_safe_many(folds, params):
+    return [run_safe(f[0], f[1], params) for f in folds]
     
 def print_better(results):
     print "better until now", sorted(results, key=lambda a: -a[0])
@@ -68,12 +68,13 @@ def grid_search(folds, cores):
 
     jobresults = []
     for p in itertools.product(Ds, lbdas, gammas):
-        jobresults.append( pool.apply_async(run_safe_many, (folds, p[0], p[1], p[2])) )
-    for r in jobresults:
-        mmrr = np.mean(r.get())
-        results.append((mmrr, p))
+        params = {"dims": p[0], "lambda": p[1], "gamma": p[2]}
+        jr = (params.copy(), pool.apply_async(run_safe_many, (folds, params)))
+        jobresults.append(jr)
+    for jr in jobresults:
+        mmrr = np.mean(jr[1].get())
+        results.append((mmrr, jr[0]))
         print_better(results)
-        
     return results
 
 def main():
