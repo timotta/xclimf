@@ -13,15 +13,14 @@ import psutil
 from optparse import OptionParser
 from multiprocess import Pool, cpu_count
 
-def print_interaction(i, objective, U, V):
-    print("interaction %d: %f" % (i,objective) )
+def print_interaction(i, objective, U, V, params):
+    print("iteraction %d: %f (%s)" % (i,objective,params) )
 
-def run(train, test, D, lbda, gamma, eps=0.1):
+def run(train, test, params, eps=0.1):
     print "=" * 80
-    print D, lbda, gamma
+    print params
     
-    (U, V) = xclimf.gradient_ascent(train, test, D, lbda, gamma, 
-                      foreach=print_interaction)
+    (U, V) = xclimf.gradient_ascent(train, test, params, foreach=print_interaction)
 
     trainmrr = xclimf.compute_mrr(train, U, V)
     testmrr = xclimf.compute_mrr(test, U, V)
@@ -31,7 +30,7 @@ def run(train, test, D, lbda, gamma, eps=0.1):
 
 def run_safe(train, test, params):
     try:
-        return run(train, test, params["dims"], params["lambda"], params["gamma"])    
+        return run(train, test, params)    
     except Exception, e:
         print(e)
         return 0.0

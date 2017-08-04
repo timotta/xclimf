@@ -135,17 +135,22 @@ def compute_mrr(data,U,V):
                     break
     return np.mean(mrr)
 
-def gradient_ascent(train, test, D, lbda, gamma, max_iters=25, foreach=None, eps=0.1):
+def gradient_ascent(train, test, params, foreach=None, eps=0.1):
+    D = params["dims"]
+    lbda = params["lambda"]
+    gamma = params["gamma"]
+    iters = params.get("iters", 25)
+
     U = 0.01*np.random.random_sample((train.shape[0],D))
     V = 0.01*np.random.random_sample((train.shape[1],D))
 
     last_objective = float("-inf")
 
-    for i in xrange(max_iters):
+    for i in xrange(iters):
         update(train, U, V, lbda, gamma)
         obj = objective(train, U, V, lbda)
         if foreach:
-          foreach(i, obj, U, V)
+          foreach(i, obj, U, V, params)
         if obj > last_objective:
             last_objective = obj
         elif obj < last_objective + eps:
@@ -179,19 +184,21 @@ def main():
     
     (train, test) = dataset.split_train_test(users, topitems, 0.1, opts.topk) 
     
-    def print_mrr(i, objective, U, V):
+    def print_mrr(i, objective, U, V, params):
         print("interaction %d: %f" % (i,objective) )
         trainmrr = compute_mrr(train, U, V)
         testmrr = compute_mrr(test, U, V)
         print "train mrr", trainmrr
         print "test mrr", testmrr
     
-    (U, V) = gradient_ascent(train, test, 
-      D=opts.D, 
-      lbda=opts.lbda, 
-      gamma=opts.gamma,
-      max_iters=opts.iters,
-      foreach=print_mrr)
+    params = {
+      "dims": opts.D,
+      "lambda": opts.lbda,
+      "gamma": opts.gamma,
+      "iters": opts.iters
+    }
+    
+    (U, V) = gradient_ascent(train, test, params, foreach=print_mrr)
       
     print("U", U)
     print("V", V)
