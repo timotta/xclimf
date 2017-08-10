@@ -26,21 +26,13 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 ## Experiments
 
-1. Runned Grid Search for movie lens 20m dataset ( https://grouplens.org/datasets/movielens/20m/ ). Got as best cross validation MRR: 0.0398 using D=25, lambda=10, gamma=10. 
+1. Runned Grid Search for movie lens 20m dataset ( https://grouplens.org/datasets/movielens/20m/ ). Got as best cross validation MRR: 0.008 using D=15, lambda=0.001, gamma=0.0001. 
 
-        python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+    python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+    
+2. Runned XClimf with hyperparameters tunned by Grid Search on movie lens 20m dataset, but got **math range error**
 
-2. Runned again Grid Search for movie lens 20m dataset and got the same result for MRR: 0.0368 using D=25, lambda=10, gamma=10
-
-        python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
-
-3. Runned Grid Search params results on entire dataset but got "math range error"
-
-        python -u xclimf.py --dataset ../ml-20m/ratings.csv --sep , --skipfl --dim 25 --lambda 10 --gamma 10
-        
-4. After changing the Grid Search to use whole dataset for train but select a sample of different users for test in each fold: Got as best cross validation MRR: 0.01 using D=25, lambda=10, gamma=10.
-
-        python -u grid_search.py --dataset ../ml-20m/ratings.csv --sep , --skipfl
+    python -u xclimf.py --dataset ../ml-20m/ratings.csv --sep , --skipfl --dim 15 --lambda 0.001 --gamma 0.0001
 
 ## Problems
 
