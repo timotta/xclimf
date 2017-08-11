@@ -28,15 +28,12 @@ def run(train, test, params, eps=0.1):
     print "test mrr", testmrr
     return testmrr
 
-def run_safe(train, test, params):
+def run_safe_many(folds, params):
     try:
-        return run(train, test, params)    
+        return [run(f[0], f[1], params) for f in folds]
     except Exception, e:
         print(e)
-        return 0.0
-    
-def run_safe_many(folds, params):
-    return [run_safe(f[0], f[1], params) for f in folds]
+        return -1.0
     
 def print_better(results):
     print "better until now", sorted(results, key=lambda a: -a[0])
@@ -98,7 +95,7 @@ def main():
     
     folds = dataset.split_many_train_test(
       opts.kfolds, users, topitems,
-      0.1, opts.topk
+      0.1, opts.topktrain, opts.topktest
     )
     
     print("splited into %d folds" % (len(folds)) )

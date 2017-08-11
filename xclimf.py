@@ -182,7 +182,10 @@ def main():
     
     print("do not use these top items %s" % str(topitems))
     
-    (train, test) = dataset.split_train_test(users, topitems, 0.1, opts.topk) 
+    (train, test) = dataset.split_train_test(
+      users, topitems, 0.1, 
+      opts.topktrain, opts.topktest
+    ) 
     
     def print_mrr(i, objective, U, V, params):
         print("interaction %d: %f" % (i,objective) )
