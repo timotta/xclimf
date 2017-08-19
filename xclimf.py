@@ -80,11 +80,9 @@ def update(data,Uo,Vo,lbda,gamma):
     
     for m in xrange(len(U)):    
         dU = np.zeros(len(U[m]))
-        lbdaum = lbda * U[m]
         f = precompute_f(data,U,V,m)
         
         for i in f:
-        
             ymi = data[m,i]
             fmi = f[i]
             g_fmi = g(-fmi)
@@ -111,8 +109,9 @@ def update(data,Uo,Vo,lbda,gamma):
             dI = ymi * brackets_i * U[m] - lbda * V[i]
             Vo[i] += gamma * dI
             
-            dU += ymi * brackets_u - lbdaum
+            dU += ymi * brackets_u
             
+        dU = dU - lbda * U[m]
         Uo[m] += gamma * dU
       
 
