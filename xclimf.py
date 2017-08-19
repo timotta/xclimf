@@ -184,7 +184,8 @@ def main():
     
     (train, test) = dataset.split_train_test(
       users, topitems, 0.1, 
-      opts.topktrain, opts.topktest
+      opts.topktrain, opts.topktest,
+      opts.seltype
     ) 
     
     def print_mrr(i, objective, U, V, params):
