@@ -77,13 +77,14 @@ def update(data,Uo,Vo,lbda,gamma):
     """
     U = Uo.copy()
     V = Vo.copy()
-    dIs = np.zeros(V.shape)
     
     for m in xrange(len(U)):    
         dU = np.zeros(len(U[m]))
+        lbdaum = lbda * U[m]
         f = precompute_f(data,U,V,m)
         
         for i in f:
+        
             ymi = data[m,i]
             fmi = f[i]
             g_fmi = g(-fmi)
@@ -106,15 +107,13 @@ def update(data,Uo,Vo,lbda,gamma):
                     div1 = 1/(1 - (ymk * g(fmk_fmi)))
                     div2 = 1/(1 - (ymi * g(fmi_fmk)))
                     brackets_i += ymk * dg(fmi_fmk) * (div1 - div2)
-
-            dIs[i] += ymi * brackets_i * U[m]
+                
+            dI = ymi * brackets_i * U[m] - lbda * V[i]
+            Vo[i] += gamma * dI
             
-            dU += ymi * brackets_u
+            dU += ymi * brackets_u - lbdaum
             
-        Uo[m] += gamma * (dU - lbda * U[m])
-        
-    for i in xrange(len(V)): 
-        Vo[i] += gamma * (dIs[i] - lbda * V[i])
+        Uo[m] += gamma * dU
       
 
 def compute_mrr(data,U,V):
