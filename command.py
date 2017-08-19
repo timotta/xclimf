@@ -8,6 +8,7 @@ def options():
     parser.add_option('--topktrain',dest='topktrain',type=int,default=5,help='number of topk training items for each user (default: %default)')
     parser.add_option('--topktest',dest='topktest',type=int,default=5,help='number of topk test items for each user (default: %default)')
     parser.add_option('--kfolds',dest='kfolds',type=int,default=3,help='number of folds for cross-validation (default: %default)')
+    parser.add_option('--seltype',dest='seltype',default="top",help='rating selection type by user [random|top] (default: %default)')
     return parser
     
  

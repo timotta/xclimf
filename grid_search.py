@@ -95,7 +95,8 @@ def main():
     
     folds = dataset.split_many_train_test(
       opts.kfolds, users, topitems,
-      0.1, opts.topktrain, opts.topktest
+      0.1, opts.topktrain, opts.topktest,
+      opt.seltype
     )
     
     print("splited into %d folds" % (len(folds)) )

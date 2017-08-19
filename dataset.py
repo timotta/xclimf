@@ -51,7 +51,7 @@ def put_matrix_data(user, top, data):
         data["cols"].append(int(t[0]))
         data["vals"].append(t[1])
     
-def split_train_test(data, topitems, perctest, topktrain, topktest):
+def split_train_test(data, topitems, perctest, ktrain, ktest, seltype="top"):
     dtrain = defaultdict(list)
     dtest = defaultdict(list)
     
@@ -62,14 +62,20 @@ def split_train_test(data, topitems, perctest, topktrain, topktest):
         ratings = users[userid][1]
     
         filtered = filter(lambda a: a[0] not in topitems, ratings)
-        sortedit = sorted(filtered, key=lambda a: a[1])
-        top = np.array(sortedit[-(topktrain+topktest):])
-        np.random.shuffle(top)
         
-        toptrain = top[:topktrain]
+        if seltype == "random":
+          top = np.array(filtered)
+          np.random.shuffle(top)
+          top = top[-(ktrain+ktest):]
+        else:
+          sortedit = sorted(filtered, key=lambda a: a[1])
+          top = np.array(sortedit[-(ktrain+ktest):])
+          np.random.shuffle(top)
+        
+        toptrain = top[:ktrain]
         put_matrix_data(userid, toptrain, dtrain)
         if random.random() < perctest:
-            toptest = top[topktrain:]
+            toptest = top[ktrain:]
             put_matrix_data(userid, toptest, dtest)
     
     train = to_matrix(dtrain)
@@ -77,9 +83,9 @@ def split_train_test(data, topitems, perctest, topktrain, topktest):
 
     return (train, test)
     
-def split_many_train_test(num, data, topitems, perctest, topktrain, topktest):
+def split_many_train_test(num, data, topitems, perctest, topktrain, topktest, seltype):
     matrixes = []
     for i in xrange(num):
-        matrixes.append(split_train_test(data, topitems, perctest, topktrain, topktest))
+        matrixes.append(split_train_test(data, topitems, perctest, topktrain, topktest, seltype))
     return matrixes
 
