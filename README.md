@@ -62,6 +62,14 @@ https://github.com/gpoesia/xclimf/issues/1)
 
       ![test mrr](https://raw.githubusercontent.com/timotta/xclimf/master/tests/test-mrr.png)
 
+9. Tryied with a bigger step size gamma of 0.01, but stoped when achived 50 iteractions. MRR was getting slightly worst each iteraction. The last one was 0.08.
+
+      ![objective](https://raw.githubusercontent.com/timotta/xclimf/master/tests/objective-2.png) 
+
+      ![train mrr](https://raw.githubusercontent.com/timotta/xclimf/master/tests/train-mrr-2.png)
+
+      ![test mrr](https://raw.githubusercontent.com/timotta/xclimf/master/tests/test-mrr-2.png)
+
 ## Problems
 
 - Get many times **math range error**s
@@ -80,5 +88,6 @@ So you run like this
 ## Running tests
 
     py.test -s
+
 
 
