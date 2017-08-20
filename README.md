@@ -56,9 +56,11 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 8. Repeated gamma 0.001 with 500 iteractions, stopying when get the maximum objective. Could not achive it. But we can see that objective do not stop increasing, but MRR for train and test datasets stoped increasing at iteraction 100:
 
-!(objective)[tests/objective.png] 
-!(objective)[tests/train-mrr.png] 
-!(objective)[tests/test-mrr.png]
+!(objective)[https://raw.githubusercontent.com/timotta/xclimf/master/tests/objective.png] 
+
+!(train mrr)[https://raw.githubusercontent.com/timotta/xclimf/master/tests/train-mrr.png] 
+
+!(test mrr)[https://raw.githubusercontent.com/timotta/xclimf/master/tests/test-mrr.png]
 
 ## Problems
 
