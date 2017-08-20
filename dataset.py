@@ -51,7 +51,7 @@ def put_matrix_data(user, top, data):
         data["cols"].append(int(t[0]))
         data["vals"].append(t[1])
     
-def split_train_test(data, topitems, perctest, ktrain, ktest, seltype="top"):
+def split_train_test(data, topitems, perctest, ktrain, ktest, seltype="top", norm=False):
     dtrain = defaultdict(list)
     dtest = defaultdict(list)
     
@@ -81,11 +81,18 @@ def split_train_test(data, topitems, perctest, ktrain, ktest, seltype="top"):
     train = to_matrix(dtrain)
     test = to_matrix(dtest)
 
+    if norm:
+        m = max(train.max(), test.max())
+        train = train/m
+        test = test/m
+
     return (train, test)
     
-def split_many_train_test(num, data, topitems, perctest, topktrain, topktest, seltype):
+def split_many_train_test(num, data, topitems, perctest, topktrain, topktest, seltype, norm):
     matrixes = []
     for i in xrange(num):
-        matrixes.append(split_train_test(data, topitems, perctest, topktrain, topktest, seltype))
+        matrixes.append(split_train_test(
+          data, topitems, perctest, topktrain, topktest, seltype, norm
+        ))
     return matrixes
 

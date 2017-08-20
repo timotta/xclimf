@@ -151,7 +151,7 @@ def gradient_ascent(train, test, params, foreach=None, eps=0.1):
         if foreach:
           foreach(i, obj, U, V, params)
         if obj > last_objective:
-            last_objective = obj
+           last_objective = obj
         elif obj < last_objective + eps:
             print "objective should be bigger or equal last objective..."
             break
@@ -184,8 +184,8 @@ def main():
     (train, test) = dataset.split_train_test(
       users, topitems, 0.1, 
       opts.topktrain, opts.topktest,
-      opts.seltype
-    ) 
+      opts.seltype, opts.norm
+    )
     
     def print_mrr(i, objective, U, V, params):
         print("interaction %d: %f" % (i,objective) )
