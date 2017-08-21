@@ -54,7 +54,9 @@ https://github.com/gpoesia/xclimf/issues/1)
 
         python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.1 --dim 10 --seltype random --norm
 
-8. Repeated gamma 0.001 with 500 iteractions, stopying when get the maximum objective. Could not achive it. But we can see that objective do not stop increasing, but MRR for train and test datasets stoped increasing at iteraction 100:
+8. Repeated gamma 0.001 with 500 iteractions, stopying when get the maximum objective. Could not achive it. But we can see that objective do not stop increasing, but MRR for train and test datasets stopped increasing at iteraction 100:
+
+        python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --seltype random --norm --iters 500
 
       ![objective](https://raw.githubusercontent.com/timotta/xclimf/master/tests/objective.png) 
 
@@ -64,11 +66,18 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 9. Tryied with a bigger step size gamma of 0.01, but stoped when achived 50 iteractions. MRR was getting slightly worst each iteraction. The last one was 0.08.
 
+        python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.01 --dim 10 --seltype random --norm --iters 100
+
       ![objective](https://raw.githubusercontent.com/timotta/xclimf/master/tests/objective-2.png) 
 
       ![train mrr](https://raw.githubusercontent.com/timotta/xclimf/master/tests/train-mrr-2.png)
 
       ![test mrr](https://raw.githubusercontent.com/timotta/xclimf/master/tests/test-mrr-2.png)
+
+10. In this experiment I used my original experimental protocol, using only the top items for each user, randomly selecting the training and testing items from those tops. Now MRR stabilized at 0.24 from 10 iteractions and above:
+
+        python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --norm --iters 100
+
 
 ## Problems
 
