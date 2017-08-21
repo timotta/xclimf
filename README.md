@@ -77,6 +77,11 @@ https://github.com/gpoesia/xclimf/issues/1)
 10. In this experiment I used my original experimental protocol, using only the top items for each user, randomly selecting the training and testing items from those tops. Now MRR stabilized at 0.24 from 10 iteractions and above:
 
         python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --norm --iters 100
+        
+        
+11. Using more top examples for training, got worst MRR: 0.13
+
+        python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --norm --iters 100 --topktrain 20
 
 
 ## Problems
