@@ -11,25 +11,39 @@ import dataset
 
 def g(x):
     """sigmoid function"""
-    return 1/(1+exp(-x))
+    return 1/(1+np.exp(-x))
 
 def dg(x):
     """derivative of sigmoid function"""
-    return exp(x)/(1+exp(x))**2
+    return np.exp(x)/(1+np.exp(x))**2
 
-def precompute_f(data,U,V,i):
-    """precompute f[j] = <U[i],V[j]>
+def precompute_f(data,U,V,m):
+    """precompute f[j] = <U[m],V[j]>
     params:
       data: scipy csr sparse matrix containing user->(item,count)
       U   : user factors
       V   : item factors
-      i   : item of interest
+      m   : user of interest
     returns:
-      dot products <U[i],V[j]> for all j in data[i]
+      dot products <U[m],V[j]> for all j in data[i]
     """
-    items = data[i].indices
-    f = dict((j,np.dot(U[i],V[j])) for j in items)
+    items = data[m].indices
+    f = dict((j,np.dot(U[m],V[j])) for j in items)
     return f
+    
+def precompute_f_optimized(data,U,V,m):
+    """precompute f[j] = <U[m],V[j]>
+    params:
+      data: scipy csr sparse matrix containing user->(item,count)
+      U   : user factors
+      V   : item factors
+      m   : user of interest
+    returns:
+      dot products <U[m],V[j]> for all j in data[i]
+    """
+    k = data[m].indices
+    v = np.dot(U[m], V[k].transpose())
+    return (k, v)
     
 def relevance_probability(r, maxi):
   """compute relevance probability as described xClimf paper
