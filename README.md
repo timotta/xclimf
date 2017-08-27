@@ -79,10 +79,27 @@ https://github.com/gpoesia/xclimf/issues/1)
         python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --norm --iters 100
         
         
-11. Using more top examples for training, got worst MRR: 0.13
+11. Using 20 top ratings for each user, got worst MRR (0.13), than using 5 top ratings:
 
         python xclimf.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --norm --iters 100 --topktrain 20
 
+12. Comparing with ALS:
+
+  1. MRR: 0.01
+
+        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100
+
+  2. MRR: 0.006
+  
+        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 200 --lambda 0.01
+
+  3. MRR: 0.004
+  
+        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 200 --lambda 0.0001
+        
+  4. MRR: 0.003
+  
+        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100 --lambda 0.1
 
 ## Problems
 

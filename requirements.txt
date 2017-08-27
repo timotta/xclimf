@@ -3,3 +3,4 @@ scipy
 pytest
 multiprocess
 psutil
+py4j
