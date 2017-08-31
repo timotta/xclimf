@@ -81,54 +81,46 @@ def objective(data,U,V,lbda):
     return obj / len(U)
 
 def update(data,Uo,Vo,lbda,gamma):
-    """update user/item factors using stochastic gradient ascent
-    params:
-      data : scipy csr sparse matrix containing user->(item,count)
-      Uo   : user factors
-      Vo   : item factors
-      lbda : regularization constant lambda
-      gamma: learning rate
-    """
     U = Uo.copy()
     V = Vo.copy()
     
-    for m in xrange(len(U)):    
-        dU = np.zeros(len(U[m]))
-        f = precompute_f(data,U,V,m)
+    for m in xrange(len(U)):
+        #Common variables used in both partial derivatives 
+        (iks, fmi) = precompute_f_optimized(data, U, V, m)
+        N = len(fmi)
+        fmk = fmi.reshape(N,1)
+        fmi_fmk = np.subtract(fmi, fmk) 
+        fmk_fmi = np.subtract(fmk, fmi) 
+        ymk = data[m, iks].toarray().transpose()
+        ymi = data[m, iks].toarray()
+        viks = V[iks]
+        g_fmi = g(-1 * fmi)
         
-        for i in f:
-            ymi = data[m,i]
-            fmi = f[i]
-            g_fmi = g(-fmi)
-            
-            brackets_u = g_fmi * V[i]
-            brackets_i = g_fmi
-            
-            for k in f:
-                if i != k:
-                    ymk = data[m,k]
-                    fmk = f[k]
-                    fmk_fmi = fmk - fmi
-                    fmi_fmk = fmi - fmk
-                    
-                    top = ymk * dg(fmk_fmi)
-                    bot = 1 - ymk * g(fmk_fmi)
-                    sub = V[i] - V[k]
-                    brackets_u += top / bot * sub
-                    
-                    div1 = 1/(1 - (ymk * g(fmk_fmi)))
-                    div2 = 1/(1 - (ymi * g(fmi_fmk)))
-                    brackets_i += ymk * dg(fmi_fmk) * (div1 - div2)
-                
-            dI = ymi * brackets_i * U[m] - lbda * V[i]
-            Vo[i] += gamma * dI
-            
-            dU += ymi * brackets_u
-            
-        dU = dU - lbda * U[m]
-        Uo[m] += gamma * dU
+        #Updating item vector
+        div1 = 1/(1 - (ymk * g(fmk_fmi)))
+        div2 = 1/(1 - (ymi * g(fmi_fmk)))
+        brackets_i = g_fmi + np.sum(ymk * dg(fmi_fmk) * (div1 - div2), axis=0)
+        dI = (ymi * brackets_i).transpose() * U[m] - lbda * viks
+        Vo[iks] += gamma * dI
+        
+        #Updating user vector
+        N2 = N*N
+        brackets_ui = g_fmi.reshape(N, 1) * viks
+        
+        D = viks.shape[1]
+        top = ymk * dg(fmk_fmi)
+        bot = 1 - ymk * g(fmk_fmi)
+        vis = np.tile(viks, (1, N)).reshape(N2, D)
+        vks = np.tile(viks, (iks.shape[0], 1))
+        sub = np.subtract(vis, vks)
+        top_bot = (top / bot).transpose().reshape(N2, 1)
+        brackets_uk = np.sum((top_bot * sub).reshape(N, N, D), axis=1)
+        
+        brackets_u = brackets_ui + brackets_uk
+        dU = ymi.transpose() * brackets_u
+        dU = np.sum(dU.transpose(), axis=1) - lbda * U[m] 
+        Uo[m] += (gamma * dU).transpose()
       
-
 def compute_mrr(data,U,V):
     """compute average Mean Reciprocal Rank of data according to factors
     params:
