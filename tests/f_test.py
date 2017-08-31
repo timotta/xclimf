@@ -53,7 +53,7 @@ def test_f_optimized():
     assert np.all(k == [0,2,4])
     assert np.allclose(v, np.array([0.0019, 0.00904, 0.003679]), atol=1e-4)
     
-def test_f_performance():
+def _test_f_performance():
     v = np.array([0.2,0.3,0.5,0.7,0.4,0.2])
     r = np.array([0,0,0,0,0,0])
     c = np.array([0,1,2,3,4,5])
