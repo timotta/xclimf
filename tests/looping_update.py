@@ -1,5 +1,5 @@
 import numpy as np
-from math import exp
+from math import exp, log
 
 def g(x):
     """sigmoid function"""
@@ -22,6 +22,44 @@ def precompute_f(data,U,V,m):
     items = data[m].indices
     f = dict((j,np.dot(U[m],V[j])) for j in items)
     return f
+
+def relevance_probability(r, maxi):
+  """compute relevance probability as described xClimf paper
+  params:
+    r:   rating
+    ma:  max rating
+  """
+  return (pow(2,r)-1)/pow(2,maxi)
+
+def objective(data,U,V,lbda):
+    """compute objective function F(U,V)
+    params:
+      data: scipy csr sparse matrix containing user->(item,count)
+      U   : user factors
+      V   : item factors
+      lbda: regularization constant lambda
+    returns:
+      current value of F(U,V)
+    """
+    maxi = data.max()
+    obj = -0.5*lbda*(np.sum(U*U)+np.sum(V*V))
+    for m in xrange(len(U)):
+        f = precompute_f(data,U,V,m)
+        for i in f:
+            fmi = f[i]
+            ymi = data[m,i]
+            rmi = relevance_probability(ymi, maxi)
+            brackets = log(g(fmi))
+            
+            for j in f:
+                fmj = f[j]
+                ymj = data[m,j]
+                rmj = relevance_probability(ymj, maxi)
+                brackets += log(1 - rmj * g(fmj - fmi))
+            
+            obj += rmi * brackets 
+            
+    return obj / len(U)
 
 def update(data,Uo,Vo,lbda,gamma):
     """update user/item factors using stochastic gradient ascent

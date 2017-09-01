@@ -16,22 +16,8 @@ def g(x):
 def dg(x):
     """derivative of sigmoid function"""
     return np.exp(x)/(1+np.exp(x))**2
-
-def precompute_f(data,U,V,m):
-    """precompute f[j] = <U[m],V[j]>
-    params:
-      data: scipy csr sparse matrix containing user->(item,count)
-      U   : user factors
-      V   : item factors
-      m   : user of interest
-    returns:
-      dot products <U[m],V[j]> for all j in data[i]
-    """
-    items = data[m].indices
-    f = dict((j,np.dot(U[m],V[j])) for j in items)
-    return f
     
-def precompute_f_optimized(data,U,V,m):
+def precompute_f(data,U,V,m):
     """precompute f[j] = <U[m],V[j]>
     params:
       data: scipy csr sparse matrix containing user->(item,count)
@@ -51,7 +37,7 @@ def relevance_probability(r, maxi):
     r:   rating
     ma:  max rating
   """
-  return (pow(2,r)-1)/pow(2,maxi)
+  return (np.power(2,r)-1)/np.power(2,maxi)
     
 def objective(data,U,V,lbda):
     """compute objective function F(U,V)
@@ -65,34 +51,42 @@ def objective(data,U,V,lbda):
     """
     maxi = data.max()
     obj = -0.5*lbda*(np.sum(U*U)+np.sum(V*V))
+    
     for m in xrange(len(U)):
-        f = precompute_f(data,U,V,m)
-        for i in f:
-            fmi = f[i]
-            ymi = data[m,i]
-            rmi = relevance_probability(ymi, maxi)
-            brackets = log(g(fmi))
-            for j in f:
-                fmj = f[j]
-                ymj = data[m,j]
-                rmj = relevance_probability(ymj, maxi)
-                brackets += log(1 - rmj * g(fmj - fmi))
-            obj += rmi * brackets 
+        (iks, fmi) = precompute_f(data, U, V, m)
+        N = len(fmi)
+        fmj = fmi.reshape(N,1)
+        ymi = data[m, iks].toarray()
+        rmi = relevance_probability(ymi, maxi)
+        rmj = rmi.transpose()
+        fmj_fmi = np.subtract(fmj, fmi)
+        b1 = np.log(g(fmi))
+        b2 = np.sum(np.log(1 - rmj * g(fmj_fmi)), axis=0)
+        obj += np.dot(rmi, (b1 + b2))[0]
+        
     return obj / len(U)
 
 def update(data,Uo,Vo,lbda,gamma):
+    """update user/item factors using stochastic gradient ascent
+    params:
+      data : scipy csr sparse matrix containing user->(item,count)
+      Uo   : user factors
+      Vo   : item factors
+      lbda : regularization constant lambda
+      gamma: learning rate
+    """
     U = Uo.copy()
     V = Vo.copy()
     
     for m in xrange(len(U)):
         #Common variables used in both partial derivatives 
-        (iks, fmi) = precompute_f_optimized(data, U, V, m)
+        (iks, fmi) = precompute_f(data, U, V, m)
         N = len(fmi)
         fmk = fmi.reshape(N,1)
         fmi_fmk = np.subtract(fmi, fmk) 
-        fmk_fmi = np.subtract(fmk, fmi) 
-        ymk = data[m, iks].toarray().transpose()
+        fmk_fmi = np.subtract(fmk, fmi)
         ymi = data[m, iks].toarray()
+        ymk = ymi.transpose()
         viks = V[iks]
         g_fmi = g(-1 * fmi)
         
@@ -140,7 +134,7 @@ def compute_mrr(data,U,V):
                     break
     return np.mean(mrr)
 
-def gradient_ascent(train, test, params, foreach=None, eps=0.1):
+def gradient_ascent(train, test, params, foreach=None, eps=1e-4):
     D = params["dims"]
     lbda = params["lambda"]
     gamma = params["gamma"]

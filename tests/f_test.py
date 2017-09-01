@@ -1,5 +1,6 @@
 from scipy.sparse import csr_matrix
-from xclimf import precompute_f, precompute_f_optimized
+import xclimf
+import looping_update
 import numpy as np
 from datetime import datetime
 
@@ -23,7 +24,7 @@ def test_f_1():
       [0.02, 0.01, 0.03, 0.04]
     ])
     
-    f = precompute_f(data, U, V, 0)
+    f = looping_update.precompute_f(data, U, V, 0)
     
     assert f.keys() == [0,2,4]
     assert np.allclose(np.array(f.values()), np.array([0.0019, 0.00904, 0.003679]), atol=1e-4)
@@ -48,12 +49,12 @@ def test_f_optimized():
       [0.02, 0.01, 0.03, 0.04]
     ])
     
-    (k,v) = precompute_f_optimized(data, U, V, 0)
+    (k,v) = xclimf.precompute_f(data, U, V, 0)
     
     assert np.all(k == [0,2,4])
     assert np.allclose(v, np.array([0.0019, 0.00904, 0.003679]), atol=1e-4)
     
-def _test_f_performance():
+def test_f_performance():
     v = np.array([0.2,0.3,0.5,0.7,0.4,0.2])
     r = np.array([0,0,0,0,0,0])
     c = np.array([0,1,2,3,4,5])
@@ -74,12 +75,12 @@ def _test_f_performance():
     
     b = datetime.now()
     for i in xrange(5000):
-        precompute_f(data, U, V, 0)
+        looping_update.precompute_f(data, U, V, 0)
     time_looping = (datetime.now()-b).total_seconds()
     
     b = datetime.now()
     for i in xrange(5000):
-        precompute_f_optimized(data, U, V, 0)
+        xclimf.precompute_f(data, U, V, 0)
     time_vector = (datetime.now()-b).total_seconds()
 
     print "looping", time_looping
