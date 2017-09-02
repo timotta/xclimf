@@ -115,7 +115,7 @@ def update(data,Uo,Vo,lbda,gamma):
         dU = np.sum(dU.transpose(), axis=1) - lbda * U[m] 
         Uo[m] += (gamma * dU).transpose()
       
-def compute_mrr(data,U,V):
+def compute_mrr(data,U,V,k=None):
     """compute average Mean Reciprocal Rank of data according to factors
     params:
       data      : scipy csr sparse matrix containing user->(item,count)
@@ -131,6 +131,9 @@ def compute_mrr(data,U,V):
             for rank,item in enumerate(np.argsort(predictions)[::-1]):
                 if item in items:
                     mrr.append(1.0/(rank+1))
+                    break
+                elif k and k < rank+1:
+                    mrr.append(0.0)
                     break
     return np.mean(mrr)
 
@@ -189,10 +192,10 @@ def main():
     
     def print_mrr(i, objective, U, V, params):
         print("interaction %d: %f" % (i,objective) )
-        trainmrr = compute_mrr(train, U, V)
-        testmrr = compute_mrr(test, U, V)
-        print "train mrr", trainmrr
-        print "test mrr", testmrr
+        print "train mrr", compute_mrr(train, U, V)
+        print "train mrr@5", compute_mrr(train, U, V, 5)
+        print "test mrr", compute_mrr(test, U, V)
+        print "test mrr@5", compute_mrr(test, U, V, 5)
     
     params = {
       "dims": opts.D,

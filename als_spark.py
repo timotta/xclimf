@@ -59,10 +59,10 @@ def main():
     
     print("als finished...")
     
-    trainmrr = xclimf.compute_mrr(train, U, V)
-    testmrr = xclimf.compute_mrr(test, U, V)
-    print "train mrr", trainmrr
-    print "test mrr", testmrr
+    print "train mrr", xclimf.compute_mrr(train, U, V)
+    print "train mrr@5", xclimf.compute_mrr(train, U, V, 5)
+    print "test mrr", xclimf.compute_mrr(test, U, V)
+    print "test mrr@5", xclimf.compute_mrr(test, U, V, 5)
   
 if __name__=='__main__':
     main()
