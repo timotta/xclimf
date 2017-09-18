@@ -101,10 +101,11 @@ https://github.com/gpoesia/xclimf/issues/1)
   
         python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100 --lambda 0.1
 
-## Problems
+13. Running with xCLiMF Spark (https://github.com/timotta/xclimf-spark) using 
+the best param combination we got the same MRR result of 0.23: (Normalization 
+option not informed because xCLiMF Spark normalizes by default).
 
-- Get many times **math range error**s
-- Get sometimes **Numerical result out of range**
+        $SPARK_HOME/bin/spark-submit --driver-class-path=data/xclimf-spark-pre.jar xclimf_spark.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --iters 25
 
 ## Running with real data
 
