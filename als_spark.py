@@ -7,6 +7,11 @@ import pyspark
 import random
 from pyspark.mllib.recommendation import ALS, MatrixFactorizationModel, Rating
 
+def quiet_logs( sc ):
+  logger = sc._jvm.org.apache.log4j
+  logger.LogManager.getLogger("org"). setLevel( logger.Level.WARN )
+  logger.LogManager.getLogger("akka").setLevel( logger.Level.ERROR )
+
 def als(train, opts):
     vals = []
     for u in xrange(train.shape[0]):
@@ -15,17 +20,26 @@ def als(train, opts):
             
     sc = pyspark.SparkContext("local")
     sc.setCheckpointDir("/tmp/" + str(random.random()))
+    quiet_logs(sc)
     ratings = sc.parallelize(vals)
     
-    model = ALS.train(ratings, opts.D, opts.iters, opts.lbda)
+    if opts.implicit:
+        model = ALS.trainImplicit(ratings, opts.D, opts.iters, opts.lbda, alpha=opts.alpha)
+    else:
+        model = ALS.train(ratings, opts.D, opts.iters, opts.lbda)
     
     U = []
     for ut in model.userFeatures().sortBy(lambda a: a[0]).collect():
-        U.append(ut[1][1])
+        U.append(ut[1])
 
+    rddItems = model.productFeatures()
+    maxItem = rddItems.map(lambda a: int(a[0])).max()
+    items = dict(rddItems.sortBy(lambda a: int(a[0])).collect())
+        
     V = []
-    for vt in model.productFeatures().sortBy(lambda a: a[0]).collect():
-        V.append(vt[1][1])
+    for i in xrange(maxItem):
+        item = items.get(i, np.zeros(opts.D))
+        V.append(item)
 
     return (U, V)
 
@@ -34,6 +48,9 @@ def main():
     parser.add_option('--dim',dest='D',type='int',default=10,help='dimensionality of factors (default: %default)')
     parser.add_option('--lambda',dest='lbda',type='float',default=0.001,help='regularization constant lambda (default: %default)')
     parser.add_option('--iters',dest='iters',type='int',default=25,help='max iterations (default: %default)')
+    parser.add_option('--ignore',dest='ignore',type='int',default=3,help='ignore top k items (default: %default)')
+    parser.add_option('--implicit',dest='implicit',action="store_true",help='implicit feedback')
+    parser.add_option('--alpha',dest='alpha',type='float',default=0.01,help='constant to compute confindence (only for implicit) (default: %default)')
     
     (opts,args) = parser.parse_args()
     if not opts.dataset:
@@ -45,7 +62,7 @@ def main():
     print("loaded %d users" % len(users))
     print("loaded %d items" % len(items))
     
-    topitems = dataset.top_items(items)
+    topitems = dataset.top_items(items, opts.ignore)
     
     print("do not use these top items %s" % str(topitems))
     

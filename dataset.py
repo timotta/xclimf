@@ -20,9 +20,11 @@ def read_users_and_items(filename, sep, skip):
                 skip = False
     return (users, items)
     
-def top_items(items):
-    return dict(sorted(items.iteritems(), key=lambda a: a[1])[-3:])
-    
+def top_items(items, topK=3):
+    if topK == 0:
+        return {}
+    return dict(sorted(items.iteritems(), key=lambda a: a[1])[-topK:])
+
 def split_folds(users, kfolds):
     total = len(users)
     userscopy = users.copy()

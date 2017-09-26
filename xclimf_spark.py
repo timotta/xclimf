@@ -27,7 +27,7 @@ def alg(train, opts):
 
     ratings = sc.parallelize(vals)
     
-    x = PyXCLiMF(opts.iters, opts.D, opts.lbda, opts.gamma, opts.topktrain, 0, 1e-4)
+    x = PyXCLiMF(opts.iters, opts.D, opts.lbda, opts.gamma, opts.topktrain, opts.ignore, 1e-4, True)
     model = x.fit(_py2java(sc, ratings))
     
     U = []
@@ -41,10 +41,8 @@ def alg(train, opts):
     V = []
     for i in xrange(maxItem):
         item = items.get(str(i), np.zeros(opts.D))
-        V.append(item)      
-
-    print(V)
-
+        V.append(item)
+    
     return (U, V)
 
 def main():
@@ -53,6 +51,7 @@ def main():
     parser.add_option('--lambda',dest='lbda',type='float',default=0.001,help='regularization constant lambda (default: %default)')
     parser.add_option('--gamma',dest='gamma',type='float',default=0.0001,help='gradient ascent learning rate gamma (default: %default)')
     parser.add_option('--iters',dest='iters',type='int',default=25,help='max iterations (default: %default)')
+    parser.add_option('--ignore',dest='ignore',type='int',default=3,help='ignore top k items (default: %default)')
 
     (opts,args) = parser.parse_args()
     if not opts.dataset:
@@ -66,12 +65,8 @@ def main():
     print("loaded %d users" % len(users))
     print("loaded %d items" % len(items))
     
-    topitems = dataset.top_items(items)
-    
-    print("do not use these top items %s" % str(topitems))
-    
     (train, test) = dataset.split_train_test(
-      users, topitems, 0.1, 
+      users, [], 0.1, 
       opts.topktrain, opts.topktest,
       opts.seltype, opts.norm
     )

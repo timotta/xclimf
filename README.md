@@ -85,27 +85,35 @@ https://github.com/gpoesia/xclimf/issues/1)
 
 12. Comparing with ALS:
 
-  - MRR: 0.01
+  - MRR: 0.07
 
-        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100
+        $SPARK_HOME/bin/spark-submit als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100
 
+  - MRR: 0.04
+  
+        $SPARK_HOME/bin/spark-submit als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 200 --lambda 0.01
+
+  - MRR: 0.13
+  
+        $SPARK_HOME/bin/spark-submit als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 200 --lambda 0.0001
+        
+  - MRR: 0.06
+  
+        $SPARK_HOME/bin/spark-submit als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100 --lambda 0.0001
+        
+  - MRR: 0.05
+  
+        $SPARK_HOME/bin/spark-submit als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 20 --dim 200 --lambda 0.0001
+        
   - MRR: 0.006
   
-        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 200 --lambda 0.01
-
-  - MRR: 0.004
-  
-        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 200 --lambda 0.0001
-        
-  - MRR: 0.003
-  
-        python als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100 --lambda 0.1
+        $SPARK_HOME/bin/spark-submit als_spark.py --dataset data/ml-1m/ratings.dat --sep :: --iters 100 --topktrain 5 --dim 100 --lambda 0.1
 
 13. Running with xCLiMF Spark (https://github.com/timotta/xclimf-spark) using 
 the best param combination we got the same MRR result of 0.23: (Normalization 
 option not informed because xCLiMF Spark normalizes by default).
 
-        $SPARK_HOME/bin/spark-submit --driver-class-path=data/xclimf-spark-pre.jar xclimf_spark.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --iters 25
+        $SPARK_HOME/bin/spark-submit --driver-class-path=data/xclimf-spark.jar xclimf_spark.py --dataset data/ml-1m/ratings.dat --sep :: --lambda 0.001 --gamma 0.001 --dim 10 --iters 25
 
 ## Running with real data
 
