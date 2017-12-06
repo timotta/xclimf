@@ -51,6 +51,7 @@ def main():
     parser.add_option('--ignore',dest='ignore',type='int',default=3,help='ignore top k items (default: %default)')
     parser.add_option('--implicit',dest='implicit',action="store_true",help='implicit feedback')
     parser.add_option('--alpha',dest='alpha',type='float',default=0.01,help='constant to compute confindence (only for implicit) (default: %default)')
+    parser.add_option('--perctest',dest='perctest',type='float',default=0.1,help='percentage of users used for test (default: %default)')
     
     (opts,args) = parser.parse_args()
     if not opts.dataset:
@@ -67,7 +68,7 @@ def main():
     print("do not use these top items %s" % str(topitems))
     
     (train, test) = dataset.split_train_test(
-      users, topitems, 0.1, 
+      users, topitems, opts.perctest, 
       opts.topktrain, opts.topktest,
       opts.seltype, opts.norm
     )
@@ -77,9 +78,9 @@ def main():
     print("als finished...")
     
     print "train mrr", xclimf.compute_mrr(train, U, V)
-    print "train mrr@5", xclimf.compute_mrr(train, U, V, 5)
+    #print "train mrr@5", xclimf.compute_mrr(train, U, V, 5)
     print "test mrr", xclimf.compute_mrr(test, U, V)
-    print "test mrr@5", xclimf.compute_mrr(test, U, V, 5)
+    #print "test mrr@5", xclimf.compute_mrr(test, U, V, 5)
   
 if __name__=='__main__':
     main()

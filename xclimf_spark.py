@@ -52,6 +52,7 @@ def main():
     parser.add_option('--gamma',dest='gamma',type='float',default=0.0001,help='gradient ascent learning rate gamma (default: %default)')
     parser.add_option('--iters',dest='iters',type='int',default=25,help='max iterations (default: %default)')
     parser.add_option('--ignore',dest='ignore',type='int',default=3,help='ignore top k items (default: %default)')
+    parser.add_option('--perctest',dest='perctest',type='float',default=0.1,help='percentage of users used for test (default: %default)')
 
     (opts,args) = parser.parse_args()
     if not opts.dataset:
@@ -66,19 +67,21 @@ def main():
     print("loaded %d items" % len(items))
     
     (train, test) = dataset.split_train_test(
-      users, [], 0.1, 
+      users, [], opts.perctest, 
       opts.topktrain, opts.topktest,
       opts.seltype, opts.norm
     )
+    
+    print("number of test users %d" % len(test.indices))
     
     (U, V) = alg(train, opts)
     
     print("xclimf spark finished...")
     
     print "train mrr", xclimf.compute_mrr(train, U, V)
-    print "train mrr@5", xclimf.compute_mrr(train, U, V, 5)
+    #print "train mrr@5", xclimf.compute_mrr(train, U, V, 5)
     print "test mrr", xclimf.compute_mrr(test, U, V)
-    print "test mrr@5", xclimf.compute_mrr(test, U, V, 5)
+    #print "test mrr@5", xclimf.compute_mrr(test, U, V, 5)
 
 if __name__=='__main__':
     main()

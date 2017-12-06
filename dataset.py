@@ -4,18 +4,34 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 def read_users_and_items(filename, sep, skip):
+    usersmap = {}
+    itemsmap = {}
     items = defaultdict(float)
     users = defaultdict(list)
+    
+    mi = 0
+    ji = 0
+    
     with open(filename, 'rb') as f:
         lines = f.readlines()
         for line in lines:
             if not skip:
                 r = line.split(sep)
-                m = r[0]
-                j = int(r[1])-1
+                
+                if r[0] not in usersmap:
+                    usersmap[r[0]] = mi
+                    mi = mi + 1
+                m = usersmap[r[0]]
+                
+                if r[1] not in itemsmap:
+                    itemsmap[r[1]] = ji
+                    ji = ji + 1
+                j = itemsmap[r[1]]
+                    
                 v = float(r[2])
-                users[m].append((j, v))
+                users[str(m)].append((j, v))
                 items[j] += v
+                m = m + 1
             else:
                 skip = False
     return (users, items)
@@ -66,18 +82,25 @@ def split_train_test(data, topitems, perctest, ktrain, ktest, seltype="top", nor
         filtered = filter(lambda a: a[0] not in topitems, ratings)
         
         if seltype == "random":
-          top = np.array(filtered)
-          np.random.shuffle(top)
-          top = top[-(ktrain+ktest):]
+            top = np.array(filtered)
+            np.random.shuffle(top)
+            top = top[-(ktrain+ktest):]
         else:
-          sortedit = sorted(filtered, key=lambda a: a[1])
-          top = np.array(sortedit[-(ktrain+ktest):])
-          np.random.shuffle(top)
-        
-        toptrain = top[:ktrain]
+            sortedit = sorted(filtered, key=lambda a: a[1])
+            top = np.array(sortedit[-(ktrain+ktest):])
+            np.random.shuffle(top)
+
+        if len(top) > ktrain:
+            cut = ktrain
+        elif len(top) > 2:
+            cut = len(top) - 1
+        else:
+            cut = len(top)
+                
+        toptrain = top[:cut]
         put_matrix_data(userid, toptrain, dtrain)
-        if random.random() < perctest:
-            toptest = top[ktrain:]
+        if len(top) > 2 and random.random() < perctest:
+            toptest = top[cut:]
             put_matrix_data(userid, toptest, dtest)
     
     train = to_matrix(dtrain)
